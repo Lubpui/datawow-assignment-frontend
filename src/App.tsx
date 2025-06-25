@@ -1,35 +1,68 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Navigate, Route, Routes } from "react-router-dom";
+import LoginPage from "./pages/Login/LoginPage";
+import PublicRoutes from "./routes/PublicRoutes";
+import { useSelector } from "react-redux";
+import { isAuthentedSelector } from "./store/slices/auth.slice";
+import Layout from "./layouts/Layout";
+import { createTheme, ThemeProvider } from "@mui/material";
 
-function App() {
-  const [count, setCount] = useState(0)
+const App = () => {
+  const isAuthented = useSelector(isAuthentedSelector);
+
+  const appTheme = createTheme();
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <ThemeProvider theme={appTheme}>
+      <Routes>
+        {/* <Route
+        path="/core"
+        element={
+          <PrivateRoutes
+            isAuthented={isAuthented}
+            expiredDate={companyInfo?.mainPackage?.expiredDate}
+          />
+        }
+      >
+        <Route
+          path="/core"
+          element={<Navigate to={RoutePath.TIME_ATTENDANCE_PAGE} />}
+        />
+        <Route path="/core" element={<Layout isAuthented={isAuthented} />}>
+          {privateRoutes.map(({ path, permissions, Component }, index) => {
+            return (
+              <Route
+                key={index}
+                path={path}
+                element={
+                  <PermissionRoutes
+                    path={path}
+                    permissions={permissions}
+                    children={<Component />}
+                    expiredDate={companyInfo?.mainPackage?.expiredDate}
+                  />
+                }
+              />
+            );
+          })}
+          <Route
+            path="*"
+            element={<Navigate to={RoutePath.TIME_ATTENDANCE_PAGE} />}
+          />
+        </Route>
+      </Route> */}
 
-export default App
+        <Route path="/" element={<PublicRoutes isAuthented={isAuthented} />}>
+          <Route path="/" element={<Navigate to="/auth/login" />} />
+          <Route path="/auth" element={<Layout isAuthented={isAuthented} />}>
+            <Route path="login" element={<LoginPage />} />
+            <Route path="/auth" element={<Navigate to="/auth/login" />} />
+          </Route>
+        </Route>
+        {/* <Route path="/notfound" element={<NotFound />} /> */}
+        <Route path="*" element={<Navigate to="/notfound" />} />
+      </Routes>
+    </ThemeProvider>
+  );
+};
+
+export default App;
