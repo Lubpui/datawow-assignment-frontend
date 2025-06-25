@@ -8,9 +8,7 @@ type PublicRoutesProps = {
 const PublicRoutes: React.FunctionComponent<PublicRoutesProps> = ({
   isAuthented,
 }) => {
-  const pinnedPath = localStorage.getItem("pin_menu");
-  const iniailPath = pinnedPath ? pinnedPath : "time-attendance";
-  return isAuthented ? <Navigate to={`/core/${iniailPath}`} /> : <Outlet />;
+  return isAuthented ? <Navigate to={`/core/home`} /> : <Outlet />;
 };
 
 export default PublicRoutes;

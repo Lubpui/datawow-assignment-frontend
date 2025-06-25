@@ -5,6 +5,11 @@ import { useSelector } from "react-redux";
 import { isAuthentedSelector } from "./store/slices/auth.slice";
 import Layout from "./layouts/Layout";
 import { createTheme, ThemeProvider } from "@mui/material";
+import PrivateRoutes from "./routes/PrivateRoutes";
+import HomePage from "./pages/Home/HomePage";
+import OurBlogPage from "./pages/OurBlog/OurBlogPage";
+import PostDetails from "./pages/Home/components/PostDetails";
+import { RoutePath } from "./utils/route.util";
 
 const App = () => {
   const isAuthented = useSelector(isAuthentedSelector);
@@ -14,48 +19,27 @@ const App = () => {
   return (
     <ThemeProvider theme={appTheme}>
       <Routes>
-        {/* <Route
-        path="/core"
-        element={
-          <PrivateRoutes
-            isAuthented={isAuthented}
-            expiredDate={companyInfo?.mainPackage?.expiredDate}
-          />
-        }
-      >
         <Route
           path="/core"
-          element={<Navigate to={RoutePath.TIME_ATTENDANCE_PAGE} />}
-        />
-        <Route path="/core" element={<Layout isAuthented={isAuthented} />}>
-          {privateRoutes.map(({ path, permissions, Component }, index) => {
-            return (
-              <Route
-                key={index}
-                path={path}
-                element={
-                  <PermissionRoutes
-                    path={path}
-                    permissions={permissions}
-                    children={<Component />}
-                    expiredDate={companyInfo?.mainPackage?.expiredDate}
-                  />
-                }
-              />
-            );
-          })}
-          <Route
-            path="*"
-            element={<Navigate to={RoutePath.TIME_ATTENDANCE_PAGE} />}
-          />
+          element={<PrivateRoutes isAuthented={isAuthented} />}
+        >
+          <Route path="/core" element={<Navigate to={RoutePath.HOME} />} />
+          <Route path="/core" element={<Layout isAuthented={isAuthented} />}>
+            <Route path={RoutePath.HOME} element={<HomePage />} />
+            <Route
+              path={RoutePath.POST_DETAILS}
+              element={<PostDetails />}
+            />
+            <Route path={RoutePath.OUR_BLOG} element={<OurBlogPage />} />
+            <Route path="*" element={<Navigate to={RoutePath.HOME} />} />
+          </Route>
         </Route>
-      </Route> */}
 
         <Route path="/" element={<PublicRoutes isAuthented={isAuthented} />}>
-          <Route path="/" element={<Navigate to="/auth/login" />} />
+          <Route path="/" element={<Navigate to={RoutePath.LOGIN} />} />
           <Route path="/auth" element={<Layout isAuthented={isAuthented} />}>
             <Route path="login" element={<LoginPage />} />
-            <Route path="/auth" element={<Navigate to="/auth/login" />} />
+            <Route path="/auth" element={<Navigate to={RoutePath.LOGIN} />} />
           </Route>
         </Route>
         {/* <Route path="/notfound" element={<NotFound />} /> */}
