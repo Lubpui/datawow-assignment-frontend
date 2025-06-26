@@ -26,10 +26,7 @@ const App = () => {
           <Route path="/core" element={<Navigate to={RoutePath.HOME} />} />
           <Route path="/core" element={<Layout isAuthented={isAuthented} />}>
             <Route path={RoutePath.HOME} element={<HomePage />} />
-            <Route
-              path={RoutePath.POST_DETAILS}
-              element={<PostDetails />}
-            />
+            <Route path={RoutePath.POST_DETAILS} element={<PostDetails />} />
             <Route path={RoutePath.OUR_BLOG} element={<OurBlogPage />} />
             <Route path="*" element={<Navigate to={RoutePath.HOME} />} />
           </Route>
