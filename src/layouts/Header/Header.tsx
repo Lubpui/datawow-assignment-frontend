@@ -1,5 +1,6 @@
 import {
   AppBar,
+  Avatar,
   Box,
   Button,
   Drawer,
@@ -15,10 +16,15 @@ import {
   type Theme,
 } from "@mui/material";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { RoutePath } from "../../utils/route.util";
+import { cookieConstants } from "../../constants/localStorage.constants";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
+import { logout } from "../../store/slices/auth.slice";
+import { useAppDispatch } from "../../store/store";
 
 const DrawerHeader = styled("div")(({ theme }) => ({
   display: "flex",
@@ -30,12 +36,24 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 }));
 
 const Header = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const token = Cookies.get(cookieConstants.TOKEN_KEY);
+
   const mobileMatches = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down(800)
   );
 
   const [openMenu, setOpenMenu] = useState(false);
+
+  const getFocusMemu = useMemo(
+    () => (path: string) => {
+      return location.pathname.includes(path);
+    },
+    [location]
+  );
 
   return (
     <>
@@ -65,6 +83,22 @@ const Header = () => {
             <IconButton onClick={() => setOpenMenu(true)}>
               <MenuRoundedIcon className="text-white" />
             </IconButton>
+          ) : token ? (
+            <Box
+              className="flex items-center gap-4 cursor-pointer rounded-[8px] px-4 py-2 hover:bg-[#ffffff15]"
+              onClick={() => {
+                dispatch(logout());
+                navigate(`/${RoutePath.LOGIN}`);
+              }}
+            >
+              <Typography className="font-inter font-medium text-white">
+                {(jwtDecode(token) as { username: string }).username}
+              </Typography>
+              <Avatar
+                className="h-[31px] w-[31px]"
+                src="/images/avatar-icon.svg"
+              />
+            </Box>
           ) : (
             <Button
               color="success"
@@ -79,6 +113,7 @@ const Header = () => {
                   boxShadow: "none",
                 },
               }}
+              onClick={() => navigate(`/${RoutePath.LOGIN}`)}
             >
               <Typography className="text-white text-[14px] font-semibold normal-case">
                 Sign in
@@ -113,6 +148,7 @@ const Header = () => {
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => {
+                setOpenMenu(false);
                 navigate(`/core/${RoutePath.HOME}`);
               }}
             >
@@ -123,13 +159,25 @@ const Header = () => {
                   alt="home-icon"
                 />
               </ListItemIcon>
-              <ListItemText primary={"Home"} className="text-[#BBC2C0]" />
+              <ListItemText
+                primary={
+                  <Typography
+                    className="font-inter text-[#BBC2C0]"
+                    sx={{
+                      fontWeight: getFocusMemu(RoutePath.HOME) ? 800 : 400,
+                    }}
+                  >
+                    Home
+                  </Typography>
+                }
+              />
             </ListItemButton>
           </ListItem>
 
           <ListItem disablePadding>
             <ListItemButton
               onClick={() => {
+                setOpenMenu(false);
                 navigate(`/core/${RoutePath.OUR_BLOG}`);
               }}
             >
@@ -141,7 +189,18 @@ const Header = () => {
                   alt="home-icon"
                 />
               </ListItemIcon>
-              <ListItemText primary={"Our Blog"} className="text-[#BBC2C0]" />
+              <ListItemText
+                primary={
+                  <Typography
+                    className="font-inter text-[#BBC2C0]"
+                    sx={{
+                      fontWeight: getFocusMemu(RoutePath.OUR_BLOG) ? 800 : 400,
+                    }}
+                  >
+                    Our Blog
+                  </Typography>
+                }
+              />
             </ListItemButton>
           </ListItem>
         </Box>

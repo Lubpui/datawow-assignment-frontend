@@ -5,6 +5,8 @@ export interface CreatePostRequest {
   description: string;
 }
 
+export interface UpdatePostRequest extends Omit<PostData, "createdAt"> {}
+
 export interface DynamicPostQuery {
   username?: string;
   mode: "all" | "user";

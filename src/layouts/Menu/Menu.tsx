@@ -6,12 +6,22 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
+  Typography,
 } from "@mui/material";
 import { RoutePath } from "../../utils/route.util";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useMemo } from "react";
 
 const Menu = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  const getFocusMemu = useMemo(
+    () => (path: string) => {
+      return location.pathname.includes(path);
+    },
+    [location]
+  );
 
   return (
     <Drawer
@@ -30,7 +40,11 @@ const Menu = () => {
       <Toolbar />
       <Box sx={{ overflow: "auto" }} className="pt-10">
         <ListItem disablePadding>
-          <ListItemButton onClick={() => {navigate(`/core/${RoutePath.HOME}`);}}>
+          <ListItemButton
+            onClick={() => {
+              navigate(`/core/${RoutePath.HOME}`);
+            }}
+          >
             <ListItemIcon>
               <img
                 className=""
@@ -39,12 +53,25 @@ const Menu = () => {
                 alt="home-icon"
               />
             </ListItemIcon>
-            <ListItemText primary={"Home"} />
+            <ListItemText
+              primary={
+                <Typography
+                  className="font-inter text-[#243831]"
+                  sx={{ fontWeight: getFocusMemu(RoutePath.HOME) ? 800 : 400 }}
+                >
+                  Home
+                </Typography>
+              }
+            />
           </ListItemButton>
         </ListItem>
 
         <ListItem disablePadding>
-          <ListItemButton onClick={() => {navigate(`/core/${RoutePath.OUR_BLOG}`);}}>
+          <ListItemButton
+            onClick={() => {
+              navigate(`/core/${RoutePath.OUR_BLOG}`);
+            }}
+          >
             <ListItemIcon>
               <img
                 className=""
@@ -53,7 +80,13 @@ const Menu = () => {
                 alt="home-icon"
               />
             </ListItemIcon>
-            <ListItemText primary={"Our Blog"} />
+
+            <Typography
+              className="font-inter text-[#243831]"
+              sx={{ fontWeight: getFocusMemu(RoutePath.OUR_BLOG) ? 800 : 400 }}
+            >
+              Our Blog
+            </Typography>
           </ListItemButton>
         </ListItem>
       </Box>

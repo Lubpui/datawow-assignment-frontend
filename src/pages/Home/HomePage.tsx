@@ -24,11 +24,18 @@ import { COMMUNITIES } from "../../constants/post.constants";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import debounce from "lodash.debounce";
 
-const HomePage = () => {
+interface HomePageProps{
+  username?:string
+}
+
+const HomePage: React.FC<HomePageProps> = ({ username }) => {
   const dispath = useAppDispatch();
 
   const [posts, setPosts] = useState<PostData[]>([]);
+  const [selectedPost, setSelectedPost] = useState<PostData>();
   const [selectedCommunity, setSelectedCommunity] = useState<string>("all");
+
+  const isOurBlog = Boolean(username)
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -60,6 +67,12 @@ const HomePage = () => {
         community: selectedCommunity,
         term: searchTerm.length >= 2 ? searchTerm : "",
       };
+      
+      if (isOurBlog) {
+        query.mode = "user";
+        query.username = username;
+      }
+      
       const { data: postRes = [] } = await dispath(
         getDynamicPosts(query)
       ).unwrap();
@@ -70,7 +83,7 @@ const HomePage = () => {
     } finally {
       setFetchLoading(false);
     }
-  }, [dispath, searchTerm, selectedCommunity]);
+  }, [dispath, isOurBlog, searchTerm, selectedCommunity, username]);
 
   useEffect(() => {
     fetchPosts();
@@ -276,33 +289,51 @@ const HomePage = () => {
     selectedCommunity,
   ]);
 
+  const renderContent = useMemo(() => {
+    return (
+      <Box className="w-full h-[calc(100vh-64px-40px)] pb-8 overflow-auto">
+        {posts.map((post, index) => {
+          return (
+            <PostCardItem
+              post={post}
+              index={index}
+              totalPosts={posts.length}
+              searchTerm={searchTerm}
+              isOurBlog={isOurBlog}
+              onClickEdit={(post: PostData) => {
+                setSelectedPost(post);
+                setOpenModal(true);
+              }}
+              callbackPost={() => {
+                fetchPosts();
+              }}
+            />
+          );
+        })}
+      </Box>
+    );
+  }, [posts, searchTerm, isOurBlog, fetchPosts]);
+
   return (
     <>
       <Box className="bg-[#BBC2C0] h-[calc(100vh-64px)] pt-10 flex justify-center w-full">
         <Box className="max-w-[798px] w-full flex flex-col gap-6 min-[800px]:gap-8 px-4">
           {renderFilter}
 
-          <Box className="w-full h-[calc(100vh-64px-40px)] pb-8 overflow-auto">
-            {posts.map((post, index) => {
-              return (
-                <PostCardItem
-                  post={post}
-                  index={index}
-                  totalPosts={posts.length}
-                  searchTerm={searchTerm}
-                />
-              );
-            })}
-          </Box>
+          {renderContent}
         </Box>
       </Box>
 
       <CreatePostModal
         open={openModal}
-        onClose={() => setOpenModal(false)}
+        onClose={() => {
+          setOpenModal(false)
+          setSelectedPost(undefined);
+         }}
         callbackSubmit={() => {
           fetchPosts();
         }}
+        selectedPost={selectedPost}
       />
 
       <LoadingProgressCircle status={fetchLoading} />

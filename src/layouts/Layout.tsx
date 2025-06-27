@@ -19,7 +19,7 @@ const Layout: React.FC<LayoutProps> = ({ isAuthented }) => {
       {isAuthented && <Header />}
       {isAuthented &&!mobileMatches&& <Menu />}
 
-      <Box className="h-full w-[100vw] pt-[64px]">
+      <Box className= {`h-full w-[100vw] ${isAuthented && 'pt-[64px]'}`}>
         <Suspense>
           <Outlet />
         </Suspense>

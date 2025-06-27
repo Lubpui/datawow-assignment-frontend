@@ -9,40 +9,48 @@ import {
   MenuItem,
   TextField,
   Typography,
+  useMediaQuery,
+  type Theme,
 } from "@mui/material";
-import React, { useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import { Controller, useForm } from "react-hook-form";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { cookieConstants } from "../../../constants/localStorage.constants";
-import { createPost } from "../../../store/slices/post.slice";
+import { createPost, updatePost } from "../../../store/slices/post.slice";
 import { useAppDispatch } from "../../../store/store";
-import type { CreatePostRequest } from "../../../types/post.type";
+import type {
+  CreatePostRequest,
+  PostData,
+  UpdatePostRequest,
+} from "../../../types/post.type";
 import LoadingProgressCircle from "../../../shared/LoadingProgressCircle";
 import { COMMUNITIES } from "../../../constants/post.constants";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 
 interface CreatePostModalProps {
   open: boolean;
+  selectedPost?: PostData;
   onClose: () => void;
   callbackSubmit: () => void;
 }
 
-export interface LoginForm {
+export interface CreatePostForm {
   community: string;
   title: string;
   description: string;
 }
 
-const defaultValues: LoginForm = {
-  community: "History",
+const defaultValues: CreatePostForm = {
+  community: "",
   title: "",
   description: "",
 };
 
 const CreatePostModal: React.FC<CreatePostModalProps> = ({
   open,
+  selectedPost,
   onClose,
   callbackSubmit,
 }) => {
@@ -50,7 +58,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
   const formRef = useRef<HTMLFormElement>(null);
 
   const [submitLoading, setSubmitLoading] = useState<boolean>(false);
-  const [selectedCommunity, setSelectedCommunity] = useState<string>("all");
+
+  const mobileMatches = useMediaQuery((theme: Theme) =>
+    theme.breakpoints.down(800)
+  );
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const openMenu = Boolean(anchorEl);
@@ -58,25 +69,36 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     setAnchorEl(event.currentTarget);
   };
 
-  const { handleSubmit, control, reset } = useForm<LoginForm>({
+  const { handleSubmit, control, reset } = useForm<CreatePostForm>({
     defaultValues,
   });
 
-  const onSubmit = async (value: LoginForm) => {
+  const onSubmit = async (value: CreatePostForm) => {
     try {
       setSubmitLoading(true);
 
-      const token = Cookies.get(cookieConstants.TOKEN_KEY);
-      if (token) {
-        const decodedToken = jwtDecode(token) as { username: string };
-
-        const postData: CreatePostRequest = {
+      if (selectedPost) {
+        // edit
+        const postData: UpdatePostRequest = {
           ...value,
-          username: decodedToken.username,
+          _id: selectedPost._id,
+          username: selectedPost.username,
+          comments: selectedPost.comments,
         };
 
-       await dispath(createPost(postData)).unwrap();
+        await dispath(updatePost(postData)).unwrap();
+      } else {
+        // create
+        const token = Cookies.get(cookieConstants.TOKEN_KEY);
+        if (token) {
+          const decodedToken = jwtDecode(token) as { username: string };
+          const postData: CreatePostRequest = {
+            ...value,
+            username: decodedToken.username,
+          };
 
+          await dispath(createPost(postData)).unwrap();
+        }
       }
     } catch (error) {
       console.log(error);
@@ -87,14 +109,29 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
     }
   };
 
+  const initailForm = useCallback(() => {
+    try {
+      if (!selectedPost) return;
+
+      const resetPayload: CreatePostForm = {
+        community: selectedPost.community,
+        title: selectedPost.title,
+        description: selectedPost.description,
+      };
+
+      reset(resetPayload);
+    } catch (error) {
+      console.log(error);
+    }
+  }, [reset, selectedPost]);
+
+  useEffect(() => {
+    initailForm();
+  }, [initailForm]);
+
   const handleClose = () => {
     onClose();
     reset(defaultValues);
-  };
-
-  const handleCloseMenu = (community: string) => {
-    setAnchorEl(null);
-    setSelectedCommunity(community);
   };
 
   return (
@@ -115,7 +152,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
             },
           }}
         >
-          <DialogTitle>
+          <DialogTitle className="!px-4">
             <Typography
               className="font-inter font-semibold"
               sx={{ fontSize: "28px" }}
@@ -123,7 +160,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
               Create Post
             </Typography>
           </DialogTitle>
-          <DialogContent className="flex flex-col gap-4">
+          <DialogContent className="flex flex-col gap-4 !px-4">
             <Box>
               <Controller
                 name="community"
@@ -144,10 +181,10 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                           },
                         }}
                         onClick={handleClick}
-                        className=""
+                        className="w-full min-[800px]:w-auto"
                       >
                         <Typography className="normal-case text-[#4caf50]">
-                          Choose a community
+                          {field.value || 'Choose a community'}
                         </Typography>
                         <KeyboardArrowDownIcon className="text-[#4caf50]" />
                       </Button>
@@ -156,7 +193,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                         id="basic-menu"
                         anchorEl={anchorEl}
                         open={openMenu}
-                        onClose={handleCloseMenu}
+                        onClose={() => setAnchorEl(null)}
                         slotProps={{
                           list: {
                             "aria-labelledby": "basic-button",
@@ -168,6 +205,9 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                             boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
                             border: "1px solid #e0e0e0",
                             minWidth: "200px",
+                            width: mobileMatches
+                              ? "calc(100% - 48px - 16px)"
+                              : "210px",
                             marginTop: "4px",
                           },
                           "& .MuiList-root": {
@@ -188,20 +228,22 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                             <MenuItem
                               key={index}
                               value={community}
-                              selected={selectedCommunity === community}
-                              onClick={() => handleCloseMenu(community)}
+                              selected={field.value === community}
+                              onClick={() => {
+                                setAnchorEl(null);
+                                field.onChange(community);
+                              }}
                               sx={{
-                                minWidth: "200px",
                                 height: "44px",
                                 fontSize: "16px",
                                 color: "#191919",
                                 backgroundColor:
-                                  selectedCommunity === community
+                                  field.value === community
                                     ? "#e8f5e8"
                                     : "transparent",
                                 "&:hover": {
                                   backgroundColor:
-                                    selectedCommunity === community
+                                    field.value === community
                                       ? "#e8f5e8"
                                       : "#f5f5f5",
                                 },
@@ -214,7 +256,7 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
                               }}
                             >
                               {community}
-                              {selectedCommunity === community && (
+                              {field.value === community && (
                                 <CheckRoundedIcon className="ml-auto text-[#4caf50]" />
                               )}
                             </MenuItem>
@@ -287,48 +329,50 @@ const CreatePostModal: React.FC<CreatePostModalProps> = ({
               }}
             />
           </DialogContent>
-          <DialogActions>
-            <Button
-              color="success"
-              className="h-[40px] w-[105px] normal-case"
-              variant="outlined"
-              sx={{
-                boxShadow: "none",
-                borderRadius: "8px",
-                border: "1px solid #49A569",
-                color: "#49A569",
-              }}
-              onClick={() => handleClose()}
-            >
-              <Typography className="text-[#3d8a57] text-[14px] font-semibold normal-case">
-                Cancel
-              </Typography>
-            </Button>
-
-            <Button
-              color="success"
-              type="submit"
-              className="h-[40px] w-[105px] normal-case"
-              variant="contained"
-              sx={{
-                backgroundColor: "#49A569",
-                boxShadow: "none",
-                borderRadius: "8px",
-                "&:hover": {
-                  backgroundColor: "#3d8a57",
+          <DialogActions className="!px-4 !pb-6">
+            <Box className="flex flex-col min-[800px]:flex-row gap-2 w-full min-[800px]:w-auto">
+              <Button
+                color="success"
+                className="h-[40px] w-full min-[800px]:w-[105px] normal-case"
+                variant="outlined"
+                sx={{
                   boxShadow: "none",
-                },
-              }}
-              onClick={() => {
-                if (formRef.current) {
-                  formRef.current.requestSubmit();
-                }
-              }}
-            >
-              <Typography className="text-white text-[14px] font-semibold normal-case">
-                Post
-              </Typography>
-            </Button>
+                  borderRadius: "8px",
+                  border: "1px solid #49A569",
+                  color: "#49A569",
+                }}
+                onClick={() => handleClose()}
+              >
+                <Typography className="text-[#3d8a57] text-[14px] font-semibold normal-case">
+                  Cancel
+                </Typography>
+              </Button>
+
+              <Button
+                color="success"
+                type="submit"
+                className="h-[40px] w-full min-[800px]:w-[105px] normal-case"
+                variant="contained"
+                sx={{
+                  backgroundColor: "#49A569",
+                  boxShadow: "none",
+                  borderRadius: "8px",
+                  "&:hover": {
+                    backgroundColor: "#3d8a57",
+                    boxShadow: "none",
+                  },
+                }}
+                onClick={() => {
+                  if (formRef.current) {
+                    formRef.current.requestSubmit();
+                  }
+                }}
+              >
+                <Typography className="text-white text-[14px] font-semibold normal-case">
+                  {selectedPost ? "Comfirm" : "Post"}
+                </Typography>
+              </Button>
+            </Box>
           </DialogActions>
         </Dialog>
       </form>

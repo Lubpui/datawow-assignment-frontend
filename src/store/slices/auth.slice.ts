@@ -18,13 +18,18 @@ const initialState: AuthState = {
 export const authSlice = createSlice({
   name: "auth",
   initialState,
-  reducers: {},
+  reducers: {
+    logout: (state: AuthState) => {
+      Cookies.remove(cookieConstants.TOKEN_KEY);
+
+      state.isAuthented = false;
+    },
+  },
   extraReducers: (builder) => {
     builder.addCase(login.pending, (state) => {
       state.isAuthented = false;
     });
     builder.addCase(login.fulfilled, (state, action) => {
-      
       if (action.payload) {
         state.isAuthented = true;
       } else {
@@ -33,7 +38,7 @@ export const authSlice = createSlice({
     });
     builder.addCase(login.rejected, (state) => {
       const userToken = Cookies.get(cookieConstants.TOKEN_KEY);
-  
+
       if (userToken) {
         state.isAuthented = true;
       } else {
@@ -64,6 +69,6 @@ export const login = createAsyncThunk(
 export const isAuthentedSelector = (store: RootState): any =>
   store.authReducer.isAuthented;
 
-// export const {} = authSlice.actions;
+export const { logout } = authSlice.actions;
 
 export default authSlice.reducer;
