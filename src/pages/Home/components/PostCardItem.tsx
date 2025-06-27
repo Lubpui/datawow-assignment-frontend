@@ -2,6 +2,8 @@ import { Avatar, Box, IconButton, Typography } from "@mui/material";
 import React, { useState } from "react";
 import type { PostData } from "../../../types/post.type";
 import DeletePostModal from "./DeletePostModal";
+import { useNavigate } from "react-router-dom";
+import { RoutePath } from "../../../utils/route.util";
 
 interface PostCardItemProps {
   post: PostData;
@@ -22,6 +24,7 @@ const PostCardItem: React.FC<PostCardItemProps> = ({
   onClickEdit,
   callbackPost,
 }) => {
+  const navigate = useNavigate();
   const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
 
   const isFirst = index === 0;
@@ -63,6 +66,11 @@ const PostCardItem: React.FC<PostCardItemProps> = ({
       <Box
         key={index}
         className={`flex flex-col gap-2 cursor-pointer min-[800px]:hover:bg-[#f9f9f9] bg-white p-5 w-full h-[200px] ${cornerRadiusClass} ${borderClass}`}
+        onClick={() => {
+          navigate(
+            `/core/${RoutePath.POST_DETAILS.replace(":postId", post._id)}`
+          );
+        }}
       >
         <Box className="flex items-start justify-between">
           <Box className="flex items-center gap-3">

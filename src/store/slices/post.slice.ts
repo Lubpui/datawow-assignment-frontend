@@ -34,6 +34,14 @@ export const updatePost = createAsyncThunk(
   }
 );
 
+export const updateComment = createAsyncThunk(
+  "post/update/comment",
+  async (updateCommentRequest: any): Promise<PostData> => {
+    const response = await postServices.updateComment(updateCommentRequest);
+    return response.data;
+  }
+);
+
 export const deletePost = createAsyncThunk(
   "post/delete",
   async (postId: string): Promise<PostData> => {
@@ -47,6 +55,14 @@ export const getDynamicPosts = createAsyncThunk(
   async (dynamicPostQuery: DynamicPostQuery): Promise<any> => {
     const response = await postServices.getDynamicPosts(dynamicPostQuery);
     return response;
+  }
+);
+
+export const getPostById = createAsyncThunk(
+  "post/id",
+  async (postId: string): Promise<any> => {
+    const response = await postServices.getPostById(postId);
+    return response.data;
   }
 );
 
