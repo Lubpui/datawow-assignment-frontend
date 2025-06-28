@@ -1,6 +1,7 @@
 import {
   Box,
   Button,
+  IconButton,
   TextField,
   Typography,
   useMediaQuery,
@@ -9,6 +10,8 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { useAppDispatch } from "../../store/store";
 import { login } from "../../store/slices/auth.slice";
+import { useNavigate } from "react-router-dom";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 
 export interface LoginForm {
   username: string;
@@ -20,6 +23,7 @@ const defaultValues: LoginForm = {
 
 const LoginPage = () => {
   const dispath = useAppDispatch();
+  const navigate = useNavigate();
 
   const mobileMatches = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down(800)
@@ -31,15 +35,28 @@ const LoginPage = () => {
 
   const onSubmit = async (value: LoginForm) => {
     try {
-       await dispath(login(value.username)).unwrap();
-
+      await dispath(login(value.username)).unwrap();
     } catch (error) {
       console.log(error);
     }
   };
 
   return (
-    <Box className="bg-[#243831] flex flex-col h-full min-[800px]:flex-row-reverse">
+    <Box className="bg-[#243831] flex flex-col h-full min-[800px]:flex-row-reverse relative">
+      <Box className="absolute top-6 left-6">
+        <IconButton
+          sx={{
+            backgroundColor: "#D8E9E4",
+            "&:hover": {
+              backgroundColor: "#c5ddd6",
+            },
+          }}
+          onClick={() => navigate(-1)}
+        >
+          <ArrowBackRoundedIcon />
+        </IconButton>
+      </Box>
+
       <Box className="flex flex-col gap-9 justify-center items-center bg-[#2B5F44] w-full min-h-[362px] min-[800px]:h-auto min-[800px]:w-[45%] rounded-b-[36px] min-[800px]:rounded-br-none min-[800px]:rounded-l-[36px]">
         <img
           src="/images/logo.png"

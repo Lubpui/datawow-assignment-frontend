@@ -23,9 +23,12 @@ import ArrowBackIosNewRoundedIcon from "@mui/icons-material/ArrowBackIosNewRound
 import { COMMUNITIES } from "../../constants/post.constants";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import debounce from "lodash.debounce";
+import WarningLoginModal from "../../shared/WarningLoginModal";
+import Cookies from "js-cookie";
+import { cookieConstants } from "../../constants/localStorage.constants";
 
-interface HomePageProps{
-  username?:string
+interface HomePageProps {
+  username?: string;
 }
 
 const HomePage: React.FC<HomePageProps> = ({ username }) => {
@@ -35,7 +38,7 @@ const HomePage: React.FC<HomePageProps> = ({ username }) => {
   const [selectedPost, setSelectedPost] = useState<PostData>();
   const [selectedCommunity, setSelectedCommunity] = useState<string>("all");
 
-  const isOurBlog = Boolean(username)
+  const isOurBlog = Boolean(username);
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -43,9 +46,13 @@ const HomePage: React.FC<HomePageProps> = ({ username }) => {
     theme.breakpoints.down(800)
   );
 
+  const token = Cookies.get(cookieConstants.TOKEN_KEY);
+
   const [isSearch, setIsSearch] = useState<boolean>(false);
   const [fetchLoading, setFetchLoading] = useState<boolean>(false);
   const [openModal, setOpenModal] = useState<boolean>(false);
+  const [openWarningLoginModal, setOpenWarningLoginModal] =
+    useState<boolean>(false);
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -67,12 +74,12 @@ const HomePage: React.FC<HomePageProps> = ({ username }) => {
         community: selectedCommunity,
         term: searchTerm.length >= 2 ? searchTerm : "",
       };
-      
+
       if (isOurBlog) {
         query.mode = "user";
         query.username = username;
       }
-      
+
       const { data: postRes = [] } = await dispath(
         getDynamicPosts(query)
       ).unwrap();
@@ -270,7 +277,14 @@ const HomePage: React.FC<HomePageProps> = ({ username }) => {
                   boxShadow: "none",
                 },
               }}
-              onClick={() => setOpenModal(true)}
+              onClick={() => {
+                if (!token) {
+                  setOpenWarningLoginModal(true);
+                  return;
+                }
+
+                setOpenModal(true);
+              }}
             >
               <Typography className="text-white text-[14px] font-semibold normal-case">
                 Create +
@@ -287,6 +301,7 @@ const HomePage: React.FC<HomePageProps> = ({ username }) => {
     mobileMatches,
     open,
     selectedCommunity,
+    token,
   ]);
 
   const renderContent = useMemo(() => {
@@ -327,13 +342,18 @@ const HomePage: React.FC<HomePageProps> = ({ username }) => {
       <CreatePostModal
         open={openModal}
         onClose={() => {
-          setOpenModal(false)
+          setOpenModal(false);
           setSelectedPost(undefined);
-         }}
+        }}
         callbackSubmit={() => {
           fetchPosts();
         }}
         selectedPost={selectedPost}
+      />
+
+      <WarningLoginModal
+        open={openWarningLoginModal}
+        onClose={() => setOpenWarningLoginModal(false)}
       />
 
       <LoadingProgressCircle status={fetchLoading} />

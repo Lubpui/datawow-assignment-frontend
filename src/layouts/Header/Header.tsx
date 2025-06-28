@@ -174,35 +174,39 @@ const Header = () => {
             </ListItemButton>
           </ListItem>
 
-          <ListItem disablePadding>
-            <ListItemButton
-              onClick={() => {
-                setOpenMenu(false);
-                navigate(`/core/${RoutePath.OUR_BLOG}`);
-              }}
-            >
-              <ListItemIcon>
-                <img
-                  className=""
-                  width={25}
-                  src={"/images/edit-icon-white.svg"}
-                  alt="home-icon"
+          {token && (
+            <ListItem disablePadding>
+              <ListItemButton
+                onClick={() => {
+                  setOpenMenu(false);
+                  navigate(`/core/${RoutePath.OUR_BLOG}`);
+                }}
+              >
+                <ListItemIcon>
+                  <img
+                    className=""
+                    width={25}
+                    src={"/images/edit-icon-white.svg"}
+                    alt="home-icon"
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography
+                      className="font-inter text-[#BBC2C0]"
+                      sx={{
+                        fontWeight: getFocusMemu(RoutePath.OUR_BLOG)
+                          ? 800
+                          : 400,
+                      }}
+                    >
+                      Our Blog
+                    </Typography>
+                  }
                 />
-              </ListItemIcon>
-              <ListItemText
-                primary={
-                  <Typography
-                    className="font-inter text-[#BBC2C0]"
-                    sx={{
-                      fontWeight: getFocusMemu(RoutePath.OUR_BLOG) ? 800 : 400,
-                    }}
-                  >
-                    Our Blog
-                  </Typography>
-                }
-              />
-            </ListItemButton>
-          </ListItem>
+              </ListItemButton>
+            </ListItem>
+          )}
         </Box>
       </Drawer>
     </>

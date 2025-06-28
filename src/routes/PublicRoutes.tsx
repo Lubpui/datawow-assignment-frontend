@@ -1,14 +1,8 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
-type PublicRoutesProps = {
-  isAuthented: boolean;
-};
 
-const PublicRoutes: React.FunctionComponent<PublicRoutesProps> = ({
-  isAuthented,
-}) => {
-  return isAuthented ? <Navigate to={`/core/home`} /> : <Outlet />;
+const PublicRoutes = () => {
+  return  <Outlet />;
 };
 
 export default PublicRoutes;

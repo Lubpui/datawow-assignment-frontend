@@ -5,7 +5,6 @@ import { useSelector } from "react-redux";
 import { isAuthentedSelector } from "./store/slices/auth.slice";
 import Layout from "./layouts/Layout";
 import { createTheme, ThemeProvider } from "@mui/material";
-import PrivateRoutes from "./routes/PrivateRoutes";
 import HomePage from "./pages/Home/HomePage";
 import OurBlogPage from "./pages/OurBlog/OurBlogPage";
 import PostDetails from "./pages/Home/components/PostDetails";
@@ -19,21 +18,17 @@ const App = () => {
   return (
     <ThemeProvider theme={appTheme}>
       <Routes>
-        <Route
-          path="/core"
-          element={<PrivateRoutes isAuthented={isAuthented} />}
-        >
-          <Route path="/core" element={<Navigate to={RoutePath.HOME} />} />
+        <Route path="/" element={<PublicRoutes />}>
+          <Route
+            path="/"
+            element={<Navigate to={`core/${RoutePath.HOME}`} />}
+          />
           <Route path="/core" element={<Layout isAuthented={isAuthented} />}>
             <Route path={RoutePath.HOME} element={<HomePage />} />
             <Route path={RoutePath.POST_DETAILS} element={<PostDetails />} />
             <Route path={RoutePath.OUR_BLOG} element={<OurBlogPage />} />
-            <Route path="*" element={<Navigate to={RoutePath.HOME} />} />
+            <Route path="/core" element={<Navigate to={RoutePath.HOME} />} />
           </Route>
-        </Route>
-
-        <Route path="/" element={<PublicRoutes isAuthented={isAuthented} />}>
-          <Route path="/" element={<Navigate to={RoutePath.LOGIN} />} />
           <Route path="/auth" element={<Layout isAuthented={isAuthented} />}>
             <Route path="login" element={<LoginPage />} />
             <Route path="/auth" element={<Navigate to={RoutePath.LOGIN} />} />

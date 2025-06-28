@@ -11,11 +11,15 @@ import {
 import { RoutePath } from "../../utils/route.util";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMemo } from "react";
+import Cookies from "js-cookie";
+import { cookieConstants } from "../../constants/localStorage.constants";
 
 const Menu = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
+  const token = Cookies.get(cookieConstants.TOKEN_KEY);
+
   const getFocusMemu = useMemo(
     () => (path: string) => {
       return location.pathname.includes(path);
@@ -66,29 +70,33 @@ const Menu = () => {
           </ListItemButton>
         </ListItem>
 
-        <ListItem disablePadding>
-          <ListItemButton
-            onClick={() => {
-              navigate(`/core/${RoutePath.OUR_BLOG}`);
-            }}
-          >
-            <ListItemIcon>
-              <img
-                className=""
-                width={25}
-                src={"/images/edit-icon.svg"}
-                alt="home-icon"
-              />
-            </ListItemIcon>
-
-            <Typography
-              className="font-inter text-[#243831]"
-              sx={{ fontWeight: getFocusMemu(RoutePath.OUR_BLOG) ? 800 : 400 }}
+        {token && (
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                navigate(`/core/${RoutePath.OUR_BLOG}`);
+              }}
             >
-              Our Blog
-            </Typography>
-          </ListItemButton>
-        </ListItem>
+              <ListItemIcon>
+                <img
+                  className=""
+                  width={25}
+                  src={"/images/edit-icon.svg"}
+                  alt="home-icon"
+                />
+              </ListItemIcon>
+
+              <Typography
+                className="font-inter text-[#243831]"
+                sx={{
+                  fontWeight: getFocusMemu(RoutePath.OUR_BLOG) ? 800 : 400,
+                }}
+              >
+                Our Blog
+              </Typography>
+            </ListItemButton>
+          </ListItem>
+        )}
       </Box>
     </Drawer>
   );

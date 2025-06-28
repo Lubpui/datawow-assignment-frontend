@@ -25,6 +25,7 @@ import { jwtDecode } from "jwt-decode";
 import { cookieConstants } from "../../../constants/localStorage.constants";
 import dayjs from "dayjs";
 import { getFormatTimeAgo } from "../../../utils/post.util";
+import WarningLoginModal from "../../../shared/WarningLoginModal";
 
 const PostDetails = () => {
   const dispatch = useAppDispatch();
@@ -35,6 +36,11 @@ const PostDetails = () => {
   const [isAddComments, setIsAddComments] = useState<boolean>(false);
   const [openAddComments, setOpenIsAddComments] = useState<boolean>(false);
   const [comment, setComment] = useState<string>("");
+
+  const [openWarningLoginModal, setOpenWarningLoginModal] =
+    useState<boolean>(false);
+
+  const token = Cookies.get(cookieConstants.TOKEN_KEY);
 
   const mobileMatches = useMediaQuery((theme: Theme) =>
     theme.breakpoints.down(800)
@@ -66,7 +72,6 @@ const PostDetails = () => {
 
       if (!post) return;
 
-      const token = Cookies.get(cookieConstants.TOKEN_KEY);
       if (!token) return;
 
       const decodedToken = jwtDecode(token) as { username: string };
@@ -85,7 +90,7 @@ const PostDetails = () => {
     } catch (error) {
       console.log(error);
     }
-  }, [comment, dispatch, mobileMatches, post]);
+  }, [comment, dispatch, mobileMatches, post, token]);
 
   const renderContent = useMemo(() => {
     if (!post) return <CircularProgress />;
@@ -261,6 +266,11 @@ const PostDetails = () => {
             },
           }}
           onClick={() => {
+            if (!token) {
+              setOpenWarningLoginModal(true);
+              return;
+            }
+
             if (mobileMatches) {
               setOpenIsAddComments(true);
             } else {
@@ -275,7 +285,7 @@ const PostDetails = () => {
         </Button>
       </Box>
     );
-  }, [fetchPost, handleAddComments, isAddComments, mobileMatches]);
+  }, [fetchPost, handleAddComments, isAddComments, mobileMatches, token]);
 
   const renderComments = useMemo(() => {
     if (!post) return;
@@ -449,6 +459,11 @@ const PostDetails = () => {
           {renderComments}
         </Box>
       </Box>
+
+      <WarningLoginModal
+        open={openWarningLoginModal}
+        onClose={() => setOpenWarningLoginModal(false)}
+      />
 
       {renderAddCommentModal}
     </>
