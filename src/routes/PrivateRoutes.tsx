@@ -10,9 +10,9 @@ const PrivateRoutes: React.FunctionComponent<PrivateRoutesProps> = ({
   isAuthented,
 }) => {
   if (isAuthented) {
-    return <Outlet />;
+    return <Navigate to="/core/home" />;
   }
-  return <Navigate to="/auth/login" />;
+  return <Outlet />;
 };
 
 export default PrivateRoutes;

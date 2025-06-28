@@ -26,6 +26,7 @@ import { cookieConstants } from "../../../constants/localStorage.constants";
 import dayjs from "dayjs";
 import { getFormatTimeAgo } from "../../../utils/post.util";
 import WarningLoginModal from "../../../shared/WarningLoginModal";
+import LoadingProgressCircle from "../../../shared/LoadingProgressCircle";
 
 const PostDetails = () => {
   const dispatch = useAppDispatch();
@@ -37,6 +38,7 @@ const PostDetails = () => {
   const [openAddComments, setOpenIsAddComments] = useState<boolean>(false);
   const [comment, setComment] = useState<string>("");
 
+  const [addCommentLoading, setAddCommentLoading] = useState<boolean>(false);
   const [openWarningLoginModal, setOpenWarningLoginModal] =
     useState<boolean>(false);
 
@@ -71,8 +73,9 @@ const PostDetails = () => {
       }
 
       if (!post) return;
-
       if (!token) return;
+
+      setAddCommentLoading(true)
 
       const decodedToken = jwtDecode(token) as { username: string };
 
@@ -89,6 +92,8 @@ const PostDetails = () => {
       setComment("");
     } catch (error) {
       console.log(error);
+    } finally {
+      setAddCommentLoading(false);
     }
   }, [comment, dispatch, mobileMatches, post, token]);
 
@@ -466,6 +471,8 @@ const PostDetails = () => {
       />
 
       {renderAddCommentModal}
+
+      <LoadingProgressCircle status={addCommentLoading} />
     </>
   );
 };

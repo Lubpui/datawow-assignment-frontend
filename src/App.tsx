@@ -9,6 +9,7 @@ import HomePage from "./pages/Home/HomePage";
 import OurBlogPage from "./pages/OurBlog/OurBlogPage";
 import PostDetails from "./pages/Home/components/PostDetails";
 import { RoutePath } from "./utils/route.util";
+import PrivateRoutes from "./routes/PrivateRoutes";
 
 const App = () => {
   const isAuthented = useSelector(isAuthentedSelector);
@@ -29,9 +30,12 @@ const App = () => {
             <Route path={RoutePath.OUR_BLOG} element={<OurBlogPage />} />
             <Route path="/core" element={<Navigate to={RoutePath.HOME} />} />
           </Route>
-          <Route path="/auth" element={<Layout isAuthented={isAuthented} />}>
-            <Route path="login" element={<LoginPage />} />
-            <Route path="/auth" element={<Navigate to={RoutePath.LOGIN} />} />
+
+          <Route path="/" element={<PrivateRoutes isAuthented={isAuthented} />}>
+            <Route path="/auth" element={<Layout isAuthented={isAuthented} />}>
+              <Route path="login" element={<LoginPage />} />
+              <Route path="/auth" element={<Navigate to={RoutePath.LOGIN} />} />
+            </Route>
           </Route>
         </Route>
         {/* <Route path="/notfound" element={<NotFound />} /> */}

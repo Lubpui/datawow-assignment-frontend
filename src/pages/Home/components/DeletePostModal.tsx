@@ -7,9 +7,10 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { useAppDispatch } from "../../../store/store";
 import { deletePost } from "../../../store/slices/post.slice";
+import LoadingProgressCircle from "../../../shared/LoadingProgressCircle";
 
 interface DeletePostModalProps {
   open: boolean;
@@ -26,13 +27,18 @@ const DeletePostModal: React.FC<DeletePostModalProps> = ({
 }) => {
   const dispath = useAppDispatch();
 
+  const [submitLoading, setSubmitLoading] = useState<boolean>(false);
+
   const handleDelete = useCallback(async () => {
     try {
+      setSubmitLoading(true);
+      if (!postId)
       await dispath(deletePost(postId)).unwrap();
     } catch (error) {
       console.log(error);
     } finally {
-      onClose()
+      setSubmitLoading(false);
+      onClose();
       callbackDelete();
     }
   }, [dispath, postId, onClose, callbackDelete]);
@@ -113,6 +119,8 @@ const DeletePostModal: React.FC<DeletePostModalProps> = ({
           </Box>
         </DialogActions>
       </Dialog>
+
+      <LoadingProgressCircle status={submitLoading} />
     </>
   );
 };
