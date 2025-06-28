@@ -32,7 +32,8 @@ const DeletePostModal: React.FC<DeletePostModalProps> = ({
   const handleDelete = useCallback(async () => {
     try {
       setSubmitLoading(true);
-      if (!postId)
+      if (!postId) return;
+
       await dispath(deletePost(postId)).unwrap();
     } catch (error) {
       console.log(error);
