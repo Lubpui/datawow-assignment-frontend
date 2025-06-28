@@ -85,7 +85,10 @@ const PostCardItem: React.FC<PostCardItemProps> = ({
 
           {isOurBlog && (
             <Box className="flex">
-              <IconButton onClick={() => onClickEdit(post)}>
+              <IconButton onClick={(e) => {
+                e.stopPropagation();
+                onClickEdit(post)
+              }}>
                 <img
                   className=""
                   width={16}
@@ -93,7 +96,10 @@ const PostCardItem: React.FC<PostCardItemProps> = ({
                   alt="home-icon"
                 />
               </IconButton>
-              <IconButton onClick={() => setOpenDeleteModal(true)}>
+              <IconButton onClick={(e) => {
+                e.stopPropagation();
+                setOpenDeleteModal(true)
+              }}>
                 <img
                   className=""
                   width={16}
